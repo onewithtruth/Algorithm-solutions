@@ -7,9 +7,9 @@ const rl = readline.createInterface({
 let input = [];
 
 rl.on("line", function (line) {
-  //input.push(line);
+  // input.push(Number(line);
   // input = line.split(" ").map((el) => Number(el));
-  input.push(line.split(" ").map((el) => Number(el)));
+  // input.push(line.split(" ").map((el) => Number(el)));
 }).on("close", function () {
 
   for(let i = 0; i < input[0][0]; i++) {
