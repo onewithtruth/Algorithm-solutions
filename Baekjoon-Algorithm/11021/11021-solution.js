@@ -13,7 +13,7 @@ rl.on("line", function (line) {
 }).on("close", function () {
   let output = "";
   for (let i = 0; i < input[0][0]; i++) {
-    output += input[i + 1][0] + input[i + 1][1] + "\n";
+    output += `Case #${i + 1}: ${input[i + 1][0] + input[i + 1][1]}` + "\n";
   }
 
   console.log(output);
