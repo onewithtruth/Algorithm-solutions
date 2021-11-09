@@ -28,3 +28,16 @@
 // Advanced
 // 피보나치 수열을 구하는 효율적인 알고리즘(O(N))이 존재합니다. 재귀함수의 호출을 직접 관찰하여 비효율이 있는지 확인해 보시기 바랍니다.
 
+function fibonacci(n) {
+  // TODO: 여기에 코드를 작성합니다.
+  let fibonacciArr = [0, 1];
+  function fibonacciOutput (n) {
+    if(fibonacciArr[n] !== undefined) {
+      return fibonacciArr[n];
+    } else {
+      fibonacciArr[n] = fibonacciOutput(n - 2) + fibonacciOutput(n - 1);
+      return fibonacciArr[n];
+    }
+  }
+  return fibonacciOutput(n);
+}
