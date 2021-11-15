@@ -1,3 +1,24 @@
+const readline = require("readline");
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+let input = [];
+
+rl.on("line", function (line) {
+  input.push(Number(line));
+  // input = line.split(" ").map((el) => Number(el));
+  // input.push(line.split(" ").map((el) => Number(el)));
+}).on("close", function () {
+  
+
+  process.exit();
+});
+
+
+
+
 // naive solution: O(2^N)
 // 2 x 4 보드에 타일을 놓는 방법은 5가지다.
 // 각 타일을 a, b, c, d로 구분한다.
