@@ -16,13 +16,13 @@ rl.on("line", function (line) {
   let memo = [0, 1, 2];
 
   function aux(size) {
-    if (memo[size] !== undefined) return memo[size];
-    if (size <= 2) return memo[size];
-    memo[size] = aux[size - 1] + aux[size - 2];
+    for(let i = 3; i <= input[0]; i++) {
+      memo[i] = (memo[i - 1] + memo[i - 2]) % 10007;
+    }
     return memo[size];
   }
 
-  output = aux(input[0]) % 10007;
+  output = aux(input[0])
 
   console.log(output);
 
