@@ -17,21 +17,14 @@ rl.on("line", function (line) {
 });
 
 
-function power(base, exponent) {
-  if (exponent === 0) return 1;
+function findMatryoshka(matryoshka, size) {
+  // recursive case
+  if (matryoshka.size === size) {
+    return true;
+  } else if (matryoshka.matryoshka && matryoshka.size > size) {
+    return findMatryoshka(matryoshka.matryoshka, size);
+  }
 
-  return base * power(base, exponent - 1) % 94906249;
-}
-
-
-
-function power(base, exponent) {
-  if (exponent === 0) return 1;
-
-  const half = parseInt(exponent / 2);
-  const temp = power(base, half);
-  const result = (temp * temp) % 94906249;
-
-  if (exponent % 2 === 1) return (base * result) % 94906249;
-  else return result;
+  // base case
+  return false;
 }
