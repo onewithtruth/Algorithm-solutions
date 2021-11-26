@@ -17,22 +17,33 @@ rl.on("line", function (line) {
 });
 
 
-const insertionSort = function (arr, transform = (item) => item) {
-  let sorted = [arr[0]];
-  for (let i = 1; i < arr.length; i++) {
-    if (transform(arr[i]) >= transform(sorted[i - 1])) {
-      sorted.push(arr[i]);
+const rotatedArraySearch = function (rotated, target) {
+  let left = 0,
+    right = rotated.length - 1;
+
+  while (left <= right) {
+    let middle = parseInt((right + left) / 2);
+
+    if (rotated[middle] === target) {
+      return middle;
+    }
+
+    if (rotated[left] < rotated[middle]) {
+      // 왼쪽 절반이 정렬되어 있는 상태
+      if (target < rotated[middle] && rotated[left] <= target) {
+        right = middle - 1;
+      } else {
+        left = middle + 1;
+      }
     } else {
-      for (let j = 0; j < i; j++) {
-        if (transform(arr[i]) <= transform(sorted[j])) {
-          const left = sorted.slice(0, j);
-          const right = sorted.slice(j);
-          sorted = left.concat(arr[i], right);
-          break;
-        }
+      // 오른쪽 절반이 정렬되어 있는 상태
+      if (target <= rotated[right] && rotated[middle] < target) {
+        left = middle + 1;
+      } else {
+        right = middle - 1;
       }
     }
   }
 
-  return sorted;
+  return -1;
 };
