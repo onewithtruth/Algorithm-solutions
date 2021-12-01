@@ -18,36 +18,45 @@ rl.on("line", function (line) {
 
 
 // naive solution
-const quickSort = function (arr) {
-  if (arr.length <= 1) return arr;
+// const balancedBrackets = function (str) {
+//   const stack = [];
+//   const opener = '(';
+//   const closer = ')';
 
-  const pivot = arr[0];
-  const left = [];
-  const right = [];
-
-  for (let i = 1; i < arr.length; i++) {
-    if (arr[i] <= pivot) left.push(arr[i]);
-    else right.push(arr[i]);
-  }
-
-  const lSorted = quickSort(left);
-  const rSorted = quickSort(right);
-  return [...lSorted, pivot, ...rSorted];
-};
-
-// function quickSort(arr, transform = (item) => item) {
-//   if (arr.length <= 1) return arr;
-
-//   const pivot = arr[0];
-//   const left = [];
-//   const right = [];
-
-//   for (let i = 1; i < arr.length; i++) {
-//     if (transform(arr[i]) < transform(pivot)) left.push(arr[i]);
-//     else right.push(arr[i]);
+//   for (let i = 0; i < str.length; i++) {
+//     if (str[i] === opener) {
+//       stack.push(str[i]);
+//     } else if (str[i] === closer) {
+//       const top = stack.pop();
+//       if (top !== opener) {
+//         return false;
+//       }
+//     }
 //   }
 
-//   const lSorted = quickSort(left, transform);
-//   const rSorted = quickSort(right, transform);
-//   return [...lSorted, pivot, ...rSorted];
-// }
+//   return stack.length === 0;
+// };
+
+const balancedBrackets = function (str) {
+  const stack = [];
+  const opener = {
+    '{': '}',
+    '[': ']',
+    '(': ')',
+  };
+  const closer = '}])';
+
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] in opener) {
+      stack.push(str[i]);
+    } else if (closer.includes(str[i])) {
+      const top = stack.pop();
+      const pair = opener[top];
+      if (pair !== str[i]) {
+        return false;
+      }
+    }
+  }
+
+  return stack.length === 0;
+};
