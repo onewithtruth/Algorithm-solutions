@@ -18,63 +18,63 @@ rl.on("line", function (line) {
 
 
 // naive solution
-const LPS3 = function (str) {
-  if (str.length < 2) return 0;
-
-  // 문자열을 두 부분으로 나누고
-  // 부분 문자열을 쉽게 구하기 위해
-  // 왼쪽 부분의 마지막 인덱스와 오른쪽 부분의 첫 인덱스를 저장
-
-  let halfSize = Math.floor(str.length / 2);
-  // 문자열의 길이가 홀수일 수 있으므로, 올림한다.
-  let rightStart = Math.ceil(str.length / 2);
-
-  // 가장 긴 LPS 후보부터 차례대로 검사한다
-  for (let offset = 0; offset < halfSize; offset++) {
-    let matched = true;
-    for (let i = 0; i < halfSize - offset; i++) {
-      if (str[i] !== str[rightStart + offset + i]) {
-        matched = false;
-        break;
-      }
-    }
-    if (matched) return halfSize - offset;
-  }
-
-  // LPS가 없는 경우
-  return 0;
-};
-
-// naive solution2
-// const LPS = function (str) {
+// const LPS3 = function (str) {
 //   if (str.length < 2) return 0;
 
 //   // 문자열을 두 부분으로 나누고
-//   // 각 부분의 첫 인덱스를 저장
-//   let leftIdx = 0;
-//   // 문자열의 길이가 홀수일 수 있으므로, 올림한다.
-//   let rightIdx = Math.ceil(str.length / 2);
+//   // 부분 문자열을 쉽게 구하기 위해
+//   // 왼쪽 부분의 마지막 인덱스와 오른쪽 부분의 첫 인덱스를 저장
 
-//   while (rightIdx < str.length) {
-//     if (str[leftIdx] == str[rightIdx]) {
-//       // LPS 검사를 시작한 위치부터 지금까지 계속 같은 경우
-//       // 다음 문자도 같은지 확인하기 위해 인덱스를 이동한다.
-//       leftIdx++;
-//       rightIdx++;
-//     } else {
-//       // leftIdx가 0인 경우, 단순히 rightIdx를 1 증가 (suffix의 시작점을 뒤로 한 칸 이동)
-//       // prefix, suffix가 계속 일치하다가 중간에서 일치하지 않는 경우에도,
-//       // 현재 suffix의 시작점을 뒤로 한 칸 이동한다.
-//       rightIdx = rightIdx - leftIdx + 1;
-//       leftIdx = 0;
+//   let halfSize = Math.floor(str.length / 2);
+//   // 문자열의 길이가 홀수일 수 있으므로, 올림한다.
+//   let rightStart = Math.ceil(str.length / 2);
+
+//   // 가장 긴 LPS 후보부터 차례대로 검사한다
+//   for (let offset = 0; offset < halfSize; offset++) {
+//     let matched = true;
+//     for (let i = 0; i < halfSize - offset; i++) {
+//       if (str[i] !== str[rightStart + offset + i]) {
+//         matched = false;
+//         break;
+//       }
 //     }
+//     if (matched) return halfSize - offset;
 //   }
 
 //   // LPS가 없는 경우
-//   return leftIdx;
+//   return 0;
 // };
 
-// // dynamic solution: O(N)
+// naive solution2
+const LPS = function (str) {
+  if (str.length < 2) return 0;
+
+  // 문자열을 두 부분으로 나누고
+  // 각 부분의 첫 인덱스를 저장
+  let leftIdx = 0;
+  // 문자열의 길이가 홀수일 수 있으므로, 올림한다.
+  let rightIdx = Math.ceil(str.length / 2);
+
+  while (rightIdx < str.length) {
+    if (str[leftIdx] == str[rightIdx]) {
+      // LPS 검사를 시작한 위치부터 지금까지 계속 같은 경우
+      // 다음 문자도 같은지 확인하기 위해 인덱스를 이동한다.
+      leftIdx++;
+      rightIdx++;
+    } else {
+      // leftIdx가 0인 경우, 단순히 rightIdx를 1 증가 (suffix의 시작점을 뒤로 한 칸 이동)
+      // prefix, suffix가 계속 일치하다가 중간에서 일치하지 않는 경우에도,
+      // 현재 suffix의 시작점을 뒤로 한 칸 이동한다.
+      rightIdx = rightIdx - leftIdx + 1;
+      leftIdx = 0;
+    }
+  }
+
+  // LPS가 없는 경우
+  return leftIdx;
+};
+
+// dynamic solution: O(N)
 // // non-overlapping 조건을 제거하고 lps를 구한다.
 // // lps는 주어진 문자열에서 아래 조건을 만족하는 가장 긴 접두어(prefix)의 길이를 의미한다.
 // //  - 해당 접두어는 주어진 문자열의 접미어(suffix)이기도 하다.
