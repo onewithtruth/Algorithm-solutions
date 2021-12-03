@@ -18,65 +18,108 @@ rl.on("line", function (line) {
 
 
 // naive solution
-// const getItemFromTwoSortedArrays = function (arr1, arr2, k) {
-//   let cnt = 0,
-//     left = 0,
-//     right = 0;
-//   let target;
-//   while (cnt < k) {
-//     if (arr1[left] < arr2[right]) {
-//       target = arr1[left];
-//       left++;
-//     } else {
-//       target = arr2[right];
-//       right++;
+// const LPS3 = function (str) {
+//   if (str.length < 2) return 0;
+
+//   // 문자열을 두 부분으로 나누고
+//   // 부분 문자열을 쉽게 구하기 위해
+//   // 왼쪽 부분의 마지막 인덱스와 오른쪽 부분의 첫 인덱스를 저장
+
+//   let halfSize = Math.floor(str.length / 2);
+//   // 문자열의 길이가 홀수일 수 있으므로, 올림한다.
+//   let rightStart = Math.ceil(str.length / 2);
+
+//   // 가장 긴 LPS 후보부터 차례대로 검사한다
+//   for (let offset = 0; offset < halfSize; offset++) {
+//     let matched = true;
+//     for (let i = 0; i < halfSize - offset; i++) {
+//       if (str[i] !== str[rightStart + offset + i]) {
+//         matched = false;
+//         break;
+//       }
 //     }
-//     cnt++;
+//     if (matched) return halfSize - offset;
 //   }
-//   return target;
+
+//   // LPS가 없는 경우
+//   return 0;
 // };
 
-// O(logK) solution
-const getItemFromTwoSortedArrays = function (arr1, arr2, k) {
-  let leftIdx = 0,
-    rightIdx = 0;
+// naive solution2
+// const LPS = function (str) {
+//   if (str.length < 2) return 0;
 
-  while (k > 0) {
-    // 이진 탐색을 위해 각 배열에서 k를 절반으로 쪼개서 카운트 한다.
-    let cnt = Math.ceil(k / 2);
-    let leftStep = cnt,
-      rightStep = cnt;
+//   // 문자열을 두 부분으로 나누고
+//   // 각 부분의 첫 인덱스를 저장
+//   let leftIdx = 0;
+//   // 문자열의 길이가 홀수일 수 있으므로, 올림한다.
+//   let rightIdx = Math.ceil(str.length / 2);
 
-    // 엣지 케이스
-    // 카운트가 남았음에도 배열의 끝에 도달하면 k를 나머지 배열쪽으로 넘긴다.
-    if (leftIdx === arr1.length) {
-      rightIdx = rightIdx + k;
-      break;
-    }
+//   while (rightIdx < str.length) {
+//     if (str[leftIdx] == str[rightIdx]) {
+//       // LPS 검사를 시작한 위치부터 지금까지 계속 같은 경우
+//       // 다음 문자도 같은지 확인하기 위해 인덱스를 이동한다.
+//       leftIdx++;
+//       rightIdx++;
+//     } else {
+//       // leftIdx가 0인 경우, 단순히 rightIdx를 1 증가 (suffix의 시작점을 뒤로 한 칸 이동)
+//       // prefix, suffix가 계속 일치하다가 중간에서 일치하지 않는 경우에도,
+//       // 현재 suffix의 시작점을 뒤로 한 칸 이동한다.
+//       rightIdx = rightIdx - leftIdx + 1;
+//       leftIdx = 0;
+//     }
+//   }
 
-    if (rightIdx === arr2.length) {
-      leftIdx = leftIdx + k;
-      break;
-    }
+//   // LPS가 없는 경우
+//   return leftIdx;
+// };
 
-    // 엣지 케이스
-    // 현재 카운트가 남아있는 후보 요소들보다 많을 경우, leftStep(현재 할당량)을 남아있는 요소들의 개수로 바꾼다.
-    if (cnt > arr1.length - leftIdx) leftStep = arr1.length - leftIdx;
-    if (cnt > arr2.length - rightIdx) rightStep = arr2.length - rightIdx;
-
-    // 두 배열의 현재 검사 요소 위치를 비교해서, 그 값이 작은 배열은 비교한 위치 앞에 있는 요소들을 모두 후보군에서 제외시킨다.
-    if (arr1[leftIdx + leftStep - 1] < arr2[rightIdx + rightStep - 1]) {
-      leftIdx = leftIdx + leftStep;
-      // 처리가 끝나면 k값을 절반으로 떨어뜨린다.
-      k = k - leftStep;
+// dynamic solution: O(N)
+// non-overlapping 조건을 제거하고 lps를 구한다.
+// lps는 주어진 문자열에서 아래 조건을 만족하는 가장 긴 접두어(prefix)의 길이를 의미한다.
+//  - 해당 접두어는 주어진 문자열의 접미어(suffix)이기도 하다.
+// 이때, 문자열 자기 자신은 그 자체로 prefix이자 suffix인데, 이는 고려 대상에서 제외한다.
+const LPS = function (str) {
+  // lps[i]는 0부터 i까지의 부분 문자열, 즉 str.slice(0, i + 1)에서 lps의 길이를 저장한다.
+  const lps = Array(str.length);
+  // lps[0]은 길이가 1인 문자열의 lps의 길이이므로 항상 0이다. (자기 자신 포함 금지)
+  lps[0] = 0;
+  let leftIdx = 0;
+  let rightIdx = 1;
+  // lps[i]를 1부터, 즉 문자열의 길이가 2일때부터 차례대로 구한다.
+  while (rightIdx < str.length) {
+    if (str[leftIdx] === str[rightIdx] && rightIdx >= str.length / 2) {
+      // 가장 단순한 경우를 생각해보면, 쉽게 이해할 수 있다.
+      // 1) 길이가 2 경우
+      // 2) 길이가 3 이상인데 전부 같은 문자인 경우
+      // 0부터 leftIdx까지 매칭이 되었으므로 매칭된 길이는 leftIdx + 1이다.
+      leftIdx++;
+      lps[rightIdx] = leftIdx;
+      rightIdx++;
     } else {
-      rightIdx = rightIdx + rightStep;
-      k = k - rightStep;
+      // 중간에 매칭이 되지 않은 경우, leftIdx를 조정한다.
+      // 현재 lps[0]부터 lps[rightIdx - 1]까지 계산이 완료된 상태이다.
+      // 처음부터 다시 prefix, suffix 매칭을 하는 것이 원칙이지만
+      // 앞서 계산한 결과인 lps 배열을 통해 처음으로 되돌아갈 필요는 없다.
+
+      // 예. aaabaaaa
+      // 현재 leftIdx는 2, rigthIdx는 3, lps는 [0, 1, 2]인 상태라고 가정해보자.
+      // leftIdx가 1일 때까지, 즉 현재 leftIdx 직전(leftIdx - 1)까지는 매칭이 되었다.
+      if (leftIdx !== 0) {
+        leftIdx = lps[leftIdx - 1];
+        // Also, note that we do
+        // not increment i here
+      } else {
+        // rightIdx가 1인 경우, 즉 첫 iteration일 경우
+        // lps[rightIdx]가 0인 것은 명백하다. (예. ab)
+        // leftIdx가 0이라는 것은 처음부터 prefix, suffix 매칭을 하는 경우이다.
+        //
+        // lps가 존재하지 않는 경우이다.
+        lps[rightIdx] = 0;
+        rightIdx++;
+      }
     }
   }
-
-  leftMax = arr1[leftIdx - 1] || -1;
-  rightMax = arr2[rightIdx - 1] || -1;
-
-  return Math.max(leftMax, rightMax);
+  const res = lps[lps.length - 1];
+  return res > str.length / 2 ? Math.floor(str.length / 2) : res;
 };
