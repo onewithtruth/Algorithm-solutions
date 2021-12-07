@@ -47,7 +47,7 @@ class BinarySearchTree {
         this.right.insert(value);
       }
     } else {
-      // 이미 value값을 포함하고 있습니다.
+      /// 이미 value값을 포함하고 있습니다.
     }
   }
   // tree의 value값을 탐색합니다.
