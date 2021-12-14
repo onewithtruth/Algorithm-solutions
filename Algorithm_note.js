@@ -17,7 +17,7 @@ rl.on("line", function (line) {
 });
 
 const spiralTraversal = function (matrix) {
-  // 각 방향마다 row와 col의 변화를 저장
+  /// 각 방향마다 row와 col의 변화를 저장
   const RIGHT = [0, 1];
   const DOWN = [1, 0];
   const LEFT = [0, -1];
