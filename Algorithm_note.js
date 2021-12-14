@@ -16,44 +16,45 @@ rl.on("line", function (line) {
   process.exit();
 });
 
-const spiralTraversal = function (matrix) {
-  /// 각 방향마다 row와 col의 변화를 저장
-  const RIGHT = [0, 1];
-  const DOWN = [1, 0];
-  const LEFT = [0, -1];
-  const UP = [-1, 0];
-  // 각 방향을 위한 lookup table
-  const MOVES = [RIGHT, DOWN, LEFT, UP];
-  const M = matrix.length;
-  const N = matrix[0].length;
-  const isValid = (row, col) => row >= 0 && row < M && col >= 0 && col < N;
+// const rotateMatrix = function (matrix) {
+//   const N = matrix.length;
+//   const M = matrix[0] && matrix[0].length;
+//   let output = [];
 
-  let cnt = 0;
-  let row = 0,
-    col = -1;
-  let direction = 0;
-  let result = '';
-  while (cnt < M * N) {
-    const move = MOVES[direction];
-    const [rd, cd] = move;
+//   for (let row = 0; row < M; row++) {
+//     output[row] = [];
+//     for (let col = 0; col < N; col++) {
+//       output[row][col] = matrix[N - col - 1][row];
+//     }
+//   }
 
-    row = row + rd;
-    col = col + cd;
-    while (isValid(row, col) && matrix[row][col] !== false) {
-      result = result + matrix[row][col];
-      // 한 요소를 두 번 접근하지 않게 하기 위해서, 접근된 요소를 false로 변경한다.
-      matrix[row][col] = false;
-      row = row + rd;
-      col = col + cd;
-      cnt++;
+//   return output;
+// };
+
+const rotateMatrix = function (matrix, rotateNum = 1) {
+  // rotateNum 이 0일 수 있으므로 아래와 같은 초기화는 지양해야 함
+  // rotateNum = rotateNum || 1
+  const N = matrix.length;
+  // 빈 배열을 입력받을 수 있다.
+  const M = matrix[0] && matrix[0].length;
+
+  rotateNum = rotateNum % 4;
+  // 회전하지 않는다.
+  if (rotateNum === 0) return matrix;
+
+  const rotated = [];
+  // 홀수번 회전 시 M x N, 짝수번 회전 시 N x M
+  const RC = rotateNum % 2 === 1 ? [M, N] : [N, M];
+
+  for (let row = 0; row < RC[0]; row++) {
+    rotated[row] = [];
+    for (let col = 0; col < RC[1]; col++) {
+      if (rotateNum === 1) rotated[row][col] = matrix[N - col - 1][row];
+      else if (rotateNum === 2)
+        rotated[row][col] = matrix[N - row - 1][M - col - 1];
+      else rotated[row][col] = matrix[col][M - row - 1];
     }
-    // row, col 이 행렬의 범위를 벗어났기 때문에,
-    // 진행된 방향의 반대로 한 칸 이동한다.
-    row = row - rd;
-    col = col - cd;
-
-    // 각 방향이 순환되기 때문에 모듈러 연산을 사용한다.
-    direction = (direction + 1) % 4;
   }
-  return result;
+
+  return rotated;
 };
