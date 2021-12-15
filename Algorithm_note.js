@@ -16,42 +16,36 @@ rl.on("line", function (line) {
   process.exit();
 });
 
-function getMax(arr) {
-  return arr.reduce((max, item) => {
-    if (item > max) return item;
-    return max;
-  }, 0);
-}
+const robotPath = function (room, src, dst) {
+  const aux = (M, N, candi, step) => {
+    // 현재 위치
+    const [row, col] = candi;
 
-function countingSort(arr, radix) {
-  const N = arr.length;
-  const output = Array(N).fill(0);
-  const count = Array(10).fill(0);
+    // 배열의 범위를 벗어난 경우
+    if (row < 0 || row >= M || col < 0 || col >= N) return;
 
-  // 현재 자리수를 기준으로 0~9의 개수를 센다.
-  arr.forEach((item) => {
-    const idx = Math.floor(item / radix) % 10;
-    count[idx]++;
-  });
+    if (room[row][col] === 0 || room[row][col] > step) {
+      room[row][col] = step;
+    } else {
+      // 장애물(1)이거나 이미 최소 시간(1)으로 통과가 가능한 경우
+      return;
+    }
 
-  // count[i]가 i까지의 누적 개수가 되도록 만든다.
-  count.reduce((totalNum, num, idx) => {
-    count[idx] = totalNum + num;
-    return totalNum + num;
-  });
+    // dfs로 4가지 방향에 대해 탐색을 한다.
+    // 완전탐색을 해야하므로 bfs나 dfs가 큰 차이가 없다.
+    // bfs의 경우 목적지에 도착하는 경우 탐색을 중단해도 되므로,
+    // 약간 더 효율적이다.
+    aux(M, N, [row + 1, col], step + 1); // 상
+    aux(M, N, [row - 1, col], step + 1); // 하
+    aux(M, N, [row, col - 1], step + 1); // 좌
+    aux(M, N, [row, col + 1], step + 1); // 우
+  };
 
-  // 아래 속성이 유지되도록 하기 위해 배열을 거꾸로 순회한다.
-  //  1. 가장 큰 값을 먼저 본다.
-  //  2. 가장 큰 값을 가장 마지막에 놓는다.
-  let i = N - 1;
-  while (i >= 0) {
-    const idx = Math.floor(arr[i] / radix) % 10;
-    // count[idx]: 현재 radix의 idx까지 누적 개수
-    // count[idx]개만큼 있으므로, 인덱스는 count[idx] - 1
-    output[count[idx] - 1] = arr[i];
-    count[idx] -= 1;
-    i--;
-  }
+  // 로봇이 서 있는 위치를 1로 초기화하면 (다시 방문하지 않기 위해서),
+  // 바로 옆 통로는 2가 된다.
+  // 계산이 완료된 후에 최종값에 1을 빼주면 된다.
+  aux(room.length, room[0].length, src, 1);
 
-  return output;
-}
+  const [r, c] = dst;
+  return room[r][c] - 1;
+};
