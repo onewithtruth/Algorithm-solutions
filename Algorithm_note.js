@@ -16,36 +16,51 @@ rl.on("line", function (line) {
   process.exit();
 });
 
-const robotPath = function (room, src, dst) {
-  const aux = (M, N, candi, step) => {
-    // 현재 위치
-    const [row, col] = candi;
+// naive solution: O(N^2)
+// const LSCS = function (arr) {
+//   let max = -100000;
+//   for (let i = 0; i < arr.length; i++) {
+//     let sum = arr[i];
+//     if (sum > max) max = sum;
+//     for (let j = i + 1; j < arr.length; j++) {
+//       sum = sum + arr[j];
+//       if (sum > max) max = sum;
+//     }
+//   }
+//   return max;
+// };
 
-    // 배열의 범위를 벗어난 경우
-    if (row < 0 || row >= M || col < 0 || col >= N) return;
+// dynamic programming: O(N)
+const LSCS = function (arr) {
+  let subArrSum = 0; // 연속 배열의 합
+  let max = Number.MIN_SAFE_INTEGER; // 정답의 후보를 저장
+  for (let i = 0; i < arr.length; i++) {
+    subArrSum = subArrSum + arr[i];
+    if (subArrSum > max) max = subArrSum;
 
-    if (room[row][col] === 0 || room[row][col] > step) {
-      room[row][col] = step;
-    } else {
-      // 장애물(1)이거나 이미 최소 시간(1)으로 통과가 가능한 경우
-      return;
+    // 연속된 구간의 합이 음수인 경우,
+    // 해당 부분은 버리고 다시 시작해도 된다.
+    if (subArrSum < 0) {
+      subArrSum = 0;
     }
+  }
 
-    // dfs로 4가지 방향에 대해 탐색을 한다.
-    // 완전탐색을 해야하므로 bfs나 dfs가 큰 차이가 없다.
-    // bfs의 경우 목적지에 도착하는 경우 탐색을 중단해도 되므로,
-    // 약간 더 효율적이다.
-    aux(M, N, [row + 1, col], step + 1); // 상
-    aux(M, N, [row - 1, col], step + 1); // 하
-    aux(M, N, [row, col - 1], step + 1); // 좌
-    aux(M, N, [row, col + 1], step + 1); // 우
-  };
-
-  // 로봇이 서 있는 위치를 1로 초기화하면 (다시 방문하지 않기 위해서),
-  // 바로 옆 통로는 2가 된다.
-  // 계산이 완료된 후에 최종값에 1을 빼주면 된다.
-  aux(room.length, room[0].length, src, 1);
-
-  const [r, c] = dst;
-  return room[r][c] - 1;
+  return max;
 };
+
+// also dynamic 2: O(N)
+// const LSCS = function (arr) {
+//   let subArrSum = arr[0];
+//   let max = arr[0]; // 정답의 후보를 저장
+//   for (let i = 1; i < arr.length; i++) {
+//     // subArrSum는 바로 직전의 요소까지 검토했을 때 가장 연속합
+//     // 연속합에 추가로 검토하는 요소, 즉 arr[i]를 더하는 것보다
+//     // arr[i] 하나의 값이 더 큰 경우 (subArrSum가 음수일 경우)
+//     // subArrSum를 버리는 게 좋다.
+//     // 쭉 더해서 음수인 부분은 굳이 더할 필요가 없다.
+//     subArrSum = Math.max(subArrSum + arr[i], arr[i]);
+//     max = Math.max(max, subArrSum);
+//   }
+
+//   return max;
+// };
