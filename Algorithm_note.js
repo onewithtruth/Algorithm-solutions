@@ -16,51 +16,69 @@ rl.on("line", function (line) {
   process.exit();
 });
 
-// naive solution: O(N^2)
-// const LSCS = function (arr) {
-//   let max = -100000;
-//   for (let i = 0; i < arr.length; i++) {
-//     let sum = arr[i];
-//     if (sum > max) max = sum;
-//     for (let j = i + 1; j < arr.length; j++) {
-//       sum = sum + arr[j];
-//       if (sum > max) max = sum;
-//     }
-//   }
-//   return max;
-// };
-
-// dynamic programming: O(N)
-const LSCS = function (arr) {
-  let subArrSum = 0; // 연속 배열의 합
-  let max = Number.MIN_SAFE_INTEGER; // 정답의 후보를 저장
-  for (let i = 0; i < arr.length; i++) {
-    subArrSum = subArrSum + arr[i];
-    if (subArrSum > max) max = subArrSum;
-
-    // 연속된 구간의 합이 음수인 경우,
-    // 해당 부분은 버리고 다시 시작해도 된다.
-    if (subArrSum < 0) {
-      subArrSum = 0;
-    }
-  }
-
-  return max;
+const createMatrix = (village) => {
+  const matrix = [];
+  village.forEach((line) => {
+    const row = [];
+    for (let i = 0; i < line.length; i++) row.push(line[i]);
+    matrix.push(row);
+  });
+  return matrix;
 };
 
-// also dynamic 2: O(N)
-// const LSCS = function (arr) {
-//   let subArrSum = arr[0];
-//   let max = arr[0]; // 정답의 후보를 저장
-//   for (let i = 1; i < arr.length; i++) {
-//     // subArrSum는 바로 직전의 요소까지 검토했을 때 가장 연속합
-//     // 연속합에 추가로 검토하는 요소, 즉 arr[i]를 더하는 것보다
-//     // arr[i] 하나의 값이 더 큰 경우 (subArrSum가 음수일 경우)
-//     // subArrSum를 버리는 게 좋다.
-//     // 쭉 더해서 음수인 부분은 굳이 더할 필요가 없다.
-//     subArrSum = Math.max(subArrSum + arr[i], arr[i]);
-//     max = Math.max(max, subArrSum);
-//   }
+const gossipProtocol = function (village, row, col) {
+  // bfs 구현을 위해 큐를 선언한다.
+  // enQueue, deQueue시마다 인덱싱을 다시 하지 않기 위해
+  // 순환 큐(circular queue)로 구현한다.
+  // queue의 가능한 최대 크기만큼 배열을 선언한다.
+  // 문제의 특성에 따라 큐에는 좌표 평면의 한 점이 삽입되고, 한번 삽입된 요소는 두 번 다시 삽입되지 않는다.
+  const R = village.length;
+  const C = village[0].length;
+  const matrix = createMatrix(village);
+  const MOVES = [
+    [-1, 0], // UP
+    [1, 0], // DOWN
+    [0, 1], // RIGHT
+    [0, -1], // LEFT
+  ];
+  const MAX_SIZE = R * C; // 가능한 모든 좌표의 크기만큼 큐가 선언되었으므로, 사실 순환큐일 필요는 없다.
+  const isValid = (row, col) => row >= 0 && row < R && col >= 0 && col < C;
+  const queue = Array(MAX_SIZE);
+  let front = 0;
+  let rear = 0;
+  const isEmpty = (queue) => front === rear;
+  const enQueue = (queue, pos) => {
+    // 실행 중에 큐가 가득차지는 않기 때문에 별도의 조건문을 작성할 필요가 없다.
+    queue[rear] = pos;
+    // 모듈러스 연산을 할 필요도 사실 없다.
+    rear = (rear + 1) % MAX_SIZE;
+  };
+  const deQueue = (queue) => {
+    const pos = queue[front];
+    // 모듈러스 연산을 할 필요도 사실 없다.
+    front = (front + 1) % MAX_SIZE;
+    return pos;
+  };
 
-//   return max;
-// };
+  let cnt = 0;
+  enQueue(queue, [row, col]);
+  // 소문이 퍼지는 데 걸리는 시간을 저장한다.
+  matrix[row][col] = 0;
+  while (isEmpty(queue) === false) {
+    // 큐의 가장 앞 자리의 좌표를 얻는다.
+    const [row, col] = deQueue(queue);
+    cnt = matrix[row][col];
+
+    // 현재 지점을 기준으로 네 방향을 검토한다.
+    MOVES.forEach((move) => {
+      const [rDiff, cDiff] = move;
+      const nextRow = row + rDiff;
+      const nextCol = col + cDiff;
+      if (isValid(nextRow, nextCol) && matrix[nextRow][nextCol] === '1') {
+        enQueue(queue, [nextRow, nextCol]);
+        matrix[nextRow][nextCol] = matrix[row][col] + 1;
+      }
+    });
+  }
+  return cnt;
+};
