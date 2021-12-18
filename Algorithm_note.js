@@ -27,7 +27,7 @@ const createMatrix = (village) => {
 };
 
 const gossipProtocol = function (village, row, col) {
-  // bfs 구현을 위해 큐를 선언한다.
+  /// bfs 구현을 위해 큐를 선언한다.
   // enQueue, deQueue시마다 인덱싱을 다시 하지 않기 위해
   // 순환 큐(circular queue)로 구현한다.
   // queue의 가능한 최대 크기만큼 배열을 선언한다.
