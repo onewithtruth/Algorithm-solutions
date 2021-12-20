@@ -36,6 +36,7 @@ const robotPath2 = function (room, src, sDir, dst, dDir) {
   const directions = [];
   // 각 위치별 최소 동작의 수를 저장. 편의상 거리(dist)로 표현
   const dist = [];
+
   for (let row = 0; row < R; row++) {
     directions.push(Array(C).fill(0));
     dist.push(Array(C).fill(Number.MAX_SAFE_INTEGER));
@@ -63,6 +64,7 @@ const robotPath2 = function (room, src, sDir, dst, dDir) {
   const [dRow, dCol] = dst;
 
   enQueue(queue, [sRow, sCol]);
+
   while (isEmpty(queue) === false) {
     const [row, col] = deQueue(queue);
     const dir = directions[row][col];
@@ -118,3 +120,4 @@ const robotPath2 = function (room, src, sDir, dst, dDir) {
 
   return dist[dRow][dCol];
 };
+
