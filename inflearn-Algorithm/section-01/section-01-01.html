@@ -6,10 +6,18 @@
     <body>
         <script>
             function solution(a, b, c){
-                
-            }
-
-            console.log(solution(2, 5, 1));
+                let arr = [a, b, c];
+                let minNum;
+                for (elem of arr) {
+                    if(minNum === undefined) {
+                        minNum === elem;
+                    } else {
+                        if (elem < minNum) minNum = elem;
+                    }
+                }
+                return minNum;                
+            };
+            console.log(solution(2, 5, 6));
         </script>
     </body>
 </html>
