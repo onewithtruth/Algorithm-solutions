@@ -18,71 +18,77 @@
 
 ////////////////////////////////////
 
-// naive solution: O(N^2)
-const largestRectangularArea = function (histogram) {
-  let largest = 0;
-  // 모든 연속된 부분 히스토그램을 고려한다.
-  // 밑변의 길이를 부분 히스토그램의 길이로 고정하면, 높이는 가장 낮은 막대의 높이가 된다.
-  for (let left = 0; left < histogram.length; left++) {
-    // 길이가 1인 막대로 만들 수 있는 직사각형의 넓이는 막대의 높이와 같다.
-    let min = histogram[left];
-    for (let right = left; right < histogram.length; right++) {
-      // left부터 right까지의 히스토그램의 막대 중 가장 낮은 막대의 높이를 구한다.
-      if (histogram[right] < min) min = histogram[right];
-      // 해당 구간(left ~ right)의 막대를 전부 포함해서 만들 수 있는 직사각형의 넓이를 구한다.
-      let area = min * (right - left + 1);
-      // 매번 구한 면적을 기존의 면적과 비교해 갱신한다.
-      if (area > largest) largest = area;
+// naive solution: O(2^N)
+// 배열의 각 요소에 대해서 선택, 무시의 2가지 선택이 가능
+// const LIS = function (arr) {
+//   // 현재 검토할 차례인 배열의 '인덱스'와
+//   // 이전에 선택된 요소의 '값'을 인자로 전달한다.
+//   const pickOrNot = (idx, before) => {
+//     // base case
+//     // 가장 짧은 LIS의 길이는 1이다. 모든 요소는 그 자체로 길이 1인 부분 서열이다.
+//     if (idx === arr.length) return 1;
+
+//     // recursive case
+//     // (초기값인 Number.MAX_SAFE_INTEGER를 포함해) 이전에 선택된 요소와 비교를 한다.
+//     const adder = arr[idx] > before ? 1 : 0;
+//     return Math.max(
+//       // 1) 현재 요소를 선택한다.
+//       //  1-1) adder === 1: 현재 요소를 이전에 선택된 요소 뒤에 이어지는 요소로 생각해 LIS의 길이에 1을 더한다.
+//       //  1-2) adder === 0: 현재 요소를 이어지는 요소로 생각할 수 없는 경우. 이전 요소를 건너뛰고 LIS의 처음 또는 중간 요소로 현재 요소를 선택한다.
+//       adder + pickOrNot(idx + 1, arr[idx]), // concat or restart
+//       // 2) 현재 요소를 무시한다.
+//       pickOrNot(idx + 1, before) // ignore
+//     );
+//   };
+//   // 첫 번째 요소의 이전 요소는 없기 때문에 매우 큰 값을 이전 값으로 설정한다.
+//   // 첫 번째 요소부터 시작하는 LIS를 검사하는 효과를 갖는다.
+//   return pickOrNot(0, Number.MAX_SAFE_INTEGER);
+// };
+
+// dynamic programming with memoization: O(N^2)
+// const LIS = function (arr) {
+//   // memo[i]는 i부터 시작하는 LIS의 길이를 저장
+//   const memo = Array(arr.length).fill(-1);
+//   // 마지막 요소부터 시작하는 LIS는 1이 유일하다.
+//   memo[memo.length - 1] = 1;
+//   const calculateLIS = (idx) => {
+//     if (memo[idx] !== -1) return memo[idx];
+
+//     let max = 1;
+//     for (let i = idx + 1; i < arr.length; i++) {
+//       const len = calculateLIS(i);
+//       // idx와 i가 연결되지 않을 수도 있다.
+//       if (arr[idx] < arr[i]) {
+//         // i부터 시작하는 LIS를 연결할 수 있는 경우
+//         max = Math.max(max, len + 1);
+//       }
+//       // i부터 시작하는 LIS가 더 길 수도 있다.
+//       // idx부터 시작하는 LIS를 구해야 하므로, 무시한다.
+//     }
+//     memo[idx] = max;
+//     return memo[idx];
+//   };
+//   calculateLIS(0);
+//   // 가장 긴 길이를 구한다.
+//   return Math.max(...memo);
+// };
+
+// dynamic programming with tabulation: O(N^2)
+const LIS = function (arr) {
+  const N = arr.length;
+  // lis[i]는 i에서 끝나는 LIS의 길이를 저장
+  // 최소한 각 요소 하나로 LIS를 만들 수 있으므로 1로 초기화한다.
+  const lis = Array(N).fill(1);
+  for (let i = 1; i < N; i++) {
+    // i에서 끝나는 LIS의 길이
+    for (let j = 0; j < i; j++) {
+      // i 이전의 인덱스만 검사하면 된다.
+      // i는 1부터 시작하므로, 짧은 길이부터 검사한다. (bottom-up 방식)
+      if (arr[i] > arr[j] && lis[i] < lis[j] + 1) {
+        lis[i] = lis[j] + 1;
+      }
     }
   }
-  return largest;
-};
-
-// divide and conquer: O(N * logN)
-const largestRectangularArea = function (histogram) {
-  const createMinIdxTree = (arr, ts, te) => {
-    // 가장 작은 값의 '인덱스'를 구하기 위한 구간 트리
-    if (ts === te) return { idx: ts, val: arr[ts] };
-
-    const mid = parseInt((ts + te) / 2);
-    const left = createMinIdxTree(arr, ts, mid);
-    const right = createMinIdxTree(arr, mid + 1, te);
-
-    return {
-      val: Math.min(left.val, right.val),
-      idx: left.val < right.val ? left.idx : right.idx,
-      left,
-      right,
-    };
-  };
-  const tree = createMinIdxTree(histogram, 0, histogram.length - 1);
-
-  const getMinIdx = (ts, te, rs, re, tree) => {
-    if (rs <= ts && te <= re) return tree.idx;
-    if (te < rs || re < ts) return rs;
-
-    const mid = parseInt((ts + te) / 2);
-    const left = getMinIdx(ts, mid, rs, re, tree.left);
-    const right = getMinIdx(mid + 1, te, rs, re, tree.right);
-    return histogram[left] < histogram[right] ? left : right;
-  };
-
-  const getRangeArea = (start, end) => {
-    if (start > end) return 0;
-    // 현재 구간에서 가장 작은 막대를 찾는다.
-    // 가장 작은 막대이므로 구간의 길이 * 높이만큼의 직사각형을 만들 수 있다. (첫번째 후보)
-    const minIdx = getMinIdx(0, histogram.length - 1, start, end, tree);
-
-    // 가장 작은 막대를 기준으로 왼쪽, 오른쪽 부분에 존재하는 모든 막대의 높이가 더 크다.
-    // 재귀적으로 왼쪽 부분과 오른쪽 부분,
-    // 즉 해당 구간에서 가장 작은 막대를 제외해서 만들 수 있는 가장 큰 직사각형의 넓이를 구한다.
-    return Math.max(
-      (end - start + 1) * histogram[minIdx], // 첫번째 후보
-      getRangeArea(start, minIdx - 1),
-      getRangeArea(minIdx + 1, end)
-    );
-  };
-
-  return getRangeArea(0, histogram.length - 1);
+  return Math.max(...lis);
 };
 
