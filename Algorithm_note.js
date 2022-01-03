@@ -18,80 +18,53 @@
 
 ////////////////////////////////////
 
-// naive solution: O(2^M * N))
-// 6을 만드는 방법 중 [1, 5]와 [5, 1]을 중복해서 세면 안 되기 때문에.
-// 동전을 순서대로 사용한다.
-// const coinChange = function (total, coins) {
-//   const makeChageFrom = (left, idx) => {
-//     if (left === 0) return 1;
+const image = [
+  [1, 0, 1, 1],
+  [0, 1, 1, 1],
+  [0, 0, 1, 1],
+  [0, 0, 0, 0],
+];
 
-//     let cnt = 0;
-//     // 지금 사용하고 있는 동전부터만 고려한다.
-//     for (let i = idx; i < coins.length; i++) {
-//       if (left - coins[i] >= 0) {
-//         cnt = cnt + makeChageFrom(left - coins[i], i);
-//       }
-//     }
+1. 전체 사각형(길이 4)에 0과 1이 섞여 있으므로 X가 첫 압축 정보가 됩니다. 
+2. 그 뒤에는 차례대로 좌측 상단, 우측 상단, 좌측 하단, 우측 하단의 사각형이 압축된 정보가 나와야 합니다.
+    => X[좌상][우상][좌하][우하]
+3. 좌측 상단 사각형(길이 2)은 0과 1이 섞여 있으므로 X가 첫 압축 정보가 됩니다. 
+   그리고 나머지 좌상, 우상, 좌하, 우하 사각형은 최소단위 이므로 차례대로 1, 0, 0, 1 을 그대로 적습니다.
+    => X1001
+   좌측 상단 사각형의 정보를 반영하면 전체 데이터의 압축 정보는 아래와 같습니다.
+    => XX1001[우상][좌하][우하]
+4. 우측 상단 사각형(길이 2)은 전부 1이므로 1이 곧 압축 정보입니다. 
+    => XX10011[좌하][우하]
+5. 좌측 히단 사각형(길이 2)은 전부 0이므로 0이 곧 압축 정보입니다. 
+    => XX100110[우하]
+6. 우측 하단 사각형(길이 2)은 0과 1이 섞여 있으므로 X가 첫 압축 정보가 됩니다. 
+   그리고 나머지 좌상, 우상, 좌하, 우하 사각형은 최소단위 이므로 차례대로 1, 1, 0, 0 을 그대로 적습니다.
+    => XX100110X1100
+*/
+const decompression = function (image) {
+  // 재귀를 위한 보조 함수
+  // 파라미터는 차례대로 y좌표의 시작(Row Start), y좌표의 끝(Row End), x좌표의 시작(Col Start), x좌표의 끝(Col End)
+  const aux = (rs, re, cs, ce, image) => {
+    // base case
+    // 각 좌표에는 number 타입이 저장되어 있다.
+    if (rs === re) return String(image[rs][cs]);
 
-//     return cnt;
-//   };
-//   // 0번째 동전부터 사용한다.
-//   return makeChageFrom(total, 0);
-// };
+    // 좌상, 우상, 좌하, 우하로 구분한다.
+    const midRow = Math.floor((rs + re) / 2);
+    const midCol = Math.floor((cs + ce) / 2);
+    const leftUpper = aux(rs, midRow, cs, midCol, image);
+    const rightUpper = aux(rs, midRow, midCol + 1, ce, image);
+    const leftDown = aux(midRow + 1, re, cs, midCol, image);
+    const rightDown = aux(midRow + 1, re, midCol + 1, ce, image);
 
-// simpler recursion
-// and dynamic programming with memoization: O(M * N)
-const coinChange = function (total, coins) {
-  // memo[i][j]는 i만큼의 금액을 coins[j]부터 ~ coins[coins.length - 1]까지 사용하여 만들 수 있는 경우의 수를 저장
-  const memo = [];
-  for (let i = 0; i < total + 1; i++) memo.push(Array(coins.length).fill(-1));
-  const makeChageFrom = (left, idx) => {
-    // 0을 만드는 방법은 1가지이다. 아니면 목표 금액을 만들었다고 생각해도 된다.
-    if (left === 0) return 1;
-    // 금액이 마이너스가 되는 경우는 불가능하므로 0을 리턴
-    if (left < 0) return 0;
-    // 동전을 전부 검토해서, 남아있는 새로운 동전은 없는데 목표 금액을 만들지 못한 경우 (실패)
-    if (idx >= coins.length && left > 0) return 0;
-    // 이미 해결한 적이 있는 문제는 다시 풀지 않는다.
-    if (memo[left][idx] !== -1) return memo[left][idx];
-
-    // left만큼의 금액을 coins[idx]부터 사용하여 만들 수 있는 경우의 수는
-    //  1) coins[idx]는 그만 사용하고, 다음 동전으로 넘어가거나 (목표 금액은 그대로이고, idx가 증가한다.)
-    //  2)) coins[idx]를 한번 더 사용한다. coins[idx]를 또 사용할 수 있으므로, idx는 그대로이고, 목표 금액은 coins[i]만큼 줄어든다.
-    memo[left][idx] =
-      makeChageFrom(left, idx + 1) + makeChageFrom(left - coins[idx], idx);
-    return memo[left][idx];
+    // 주어진 사각형 전체를 순회하고 나서 재귀를 하거나
+    // 4등분한 각 사각형을 각각 순회하고 나서 재귀를 하는 방식은 데이터를 중복 조회하게 된다.
+    // 재귀적으로 각 결과를 합치면서 계산하면 모든 좌표를 한 번씩만 검토하면 된다.
+    const result = leftUpper + rightUpper + leftDown + rightDown;
+    if (result === '1111') return '1';
+    else if (result === '0000') return '0';
+    else return 'X' + result;
   };
 
-  return makeChageFrom(total, 0);
+  return aux(0, image.length - 1, 0, image.length - 1, image);
 };
-
-// dynamic programming with tabulation: O(M * N)
-// const coinChange = function (total, coins) {
-//   // table[i][j]는 coins[j]까지 사용해서 i만큼의 금액을 만들 수 있는 경우의 수를 저장
-//   const table = [];
-//   for (let i = 0; i < total + 1; i++) table.push(Array(coins.length).fill(0));
-//   // 모든 경우에 0을 만들 수 있는 경우는 1 (base case)
-//   for (let i = 0; i < coins.length; i++) table[0][i] = 1;
-
-//   for (let amount = 1; amount <= total; amount++) {
-//     // 작은 금액부터 차례대로 경우의 수를 구한다. (bottom-up)
-//     for (let idx = 0; idx < coins.length; idx++) {
-//       let coinIncluded = 0;
-//       if (amount - coins[idx] >= 0) {
-//         coinIncluded = table[amount - coins[idx]][idx];
-//       }
-
-//       let coinExcluded = 0;
-//       if (idx >= 1) {
-//         // 동전을 순서대로 검사하고 있기 때문에, 바로 직전의 경우만 고려하면 된다.
-//         // 단, 0번째 동전은 직전이 없으므로 제외한다.
-//         coinExcluded = table[amount][idx - 1];
-//       }
-
-//       table[amount][idx] = coinIncluded + coinExcluded;
-//     }
-//   }
-
-//   return table[total][coins.length - 1];
-// };
