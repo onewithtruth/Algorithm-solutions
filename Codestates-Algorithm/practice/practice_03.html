@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>출력결과</title>
+    </head>
+    <body>
+        <script>
+            function solution(board, operation){
+              const dir = {
+                "U": [-1, 0],
+                "D": [1, 0],
+                "L": [0, -1],
+                "R": [0, 1]
+              }
+              const boardLength = board.length;
+              const isValid = (col, row) => 
+                col >= 0 && 
+                col < boardLength &&
+                row >= 0 && 
+                row < boardLength;
+              
+              let col = 0;
+              let row = 0;
+              let score = 0;
+              
+              for (let i = 0; i < operation.length; i++) {
+                const [colDirection, rowDirection] = dir[operation[i]];
+                col += colDirection;
+                row += rowDirection;
+
+                if (isValid(col, row) === false) {
+                  col -= colDirection;
+                  row -= rowDirection;
+                } else {
+                  score += board[col][row];
+                  board[col][row] = 0;
+                }
+              }
+              return score;              
+            }
+            const board3 = [
+  [4345, 112, 11, 756],
+  [1, 1, 1, 0],
+  [456, 238, 77, 7],
+  [0, 0, 0, 0],
+];
+            console.log(solution(board3, 'RRDLLDDLLRRDDDLLRUUUU'));
+        </script>
+    </body>
+</html>
