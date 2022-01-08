@@ -5,12 +5,9 @@
     </head>
     <body>
         <script>
-            function solution(a, b, c){
-                let result = "YES"
-                if(a + b <= c) result = "NO"
-                if(a + c <= b) result = "NO"
-                if(b + c <= c) result = "NO"
-                return result;
+            function solution(a, b){
+                const gcd = (n, m) => n % m === 0 ? m : gcd(m, n % m);
+                return gcd(a, b)
             }
             
             console.log(solution(20, 8));
