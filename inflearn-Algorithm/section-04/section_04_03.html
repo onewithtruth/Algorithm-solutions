@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>출력결과</title>
+    </head>
+    <body>
+        <script>
+            function solution(n, arr){
+                let result;
+                let resultChecker = Number.MIN_SAFE_INTEGER;
+                for(i = 0; i < n; i++) {
+                    let sum = 0
+                    for(j = 0; j < String(arr[i]).length; j++) {
+                        sum += parseInt(String(arr[i])[j]);
+                    }
+                    if (resultChecker < sum) {
+                        resultChecker = sum
+                        result = arr[i];
+                    } else if (resultChecker === sum) {
+                        if (result < arr[i]) {
+                            result = arr[i]
+                        }
+                    }
+                }
+                return result;
+            }
+            
+            let arr01=[128, 460, 603, 40, 521, 137, 123];
+            console.log(solution(7, arr01));
+        </script>
+    </body>
+</html>
